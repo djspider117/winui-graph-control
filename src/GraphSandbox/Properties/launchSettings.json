@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "GraphSandbox (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "GraphSandbox (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
