@@ -31,7 +31,55 @@ public partial class Renderer : UserControl
 
         InitializeComponent();
     }
+
     protected override void OnRender(DrawingContext dc)
+    {
+        //RenderNukeStyle(dc);
+        RenderUnrealStyle(dc);
+    }
+
+    private void RenderNukeStyle(DrawingContext dc)
+    {
+        foreach (var node in _renderData.Nodes.Values)
+        {
+            dc.DrawRectangle(node.Background, node.Pen, new Rect(node.Rect.X, node.Rect.Y, 100, node.TitleText.Height + 10));
+            dc.DrawText(node.TitleText, node.TitleLocation);
+
+            //RenderProperties(node.InputProperties, dc);
+            //RenderProperties(node.OutputProperties, dc);
+        }
+
+        foreach (var conn in _renderData.Connections)
+        {
+            var s = _renderData.Nodes[conn.Connection.SourceNodeId];
+            var t = _renderData.Nodes[conn.Connection.TargetNodeId];
+
+            var start = new Point(s.Rect.X + 50, s.Rect.Y + s.TitleText.Height + 10);
+            var end = new Point(t.Rect.X + 50, t.Rect.Y);
+
+            dc.DrawLine(conn.Pen, start, end);
+
+            var textPos = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
+
+            var connTarget = t.InputProperties.Find(x => x.PropertyId == conn.Connection.TargetPropertyId)!;
+
+            dc.DrawRectangle(new SolidColorBrush(Colors.DarkGray), null, new Rect(textPos, new Size(connTarget.TitleText.Width, connTarget.TitleText.Height)));
+            dc.DrawText(connTarget.TitleText, textPos);
+
+            //var geometry = new StreamGeometry();
+            //using (StreamGeometryContext ctx = geometry.Open())
+            //{
+            //    ctx.BeginFigure(conn.Start, false, false);
+            //    ctx.BezierTo(conn.Control1, conn.Control2, conn.End, true, true);
+            //}
+
+            //geometry.Freeze();
+
+            //dc.DrawGeometry(null, conn.Pen, geometry);
+        }
+    }
+
+    private void RenderUnrealStyle(DrawingContext dc)
     {
         foreach (var node in _renderData.Nodes.Values)
         {
@@ -87,7 +135,7 @@ public class GraphRenderData
         var lgray = new SolidColorBrush(Colors.LightGray);
         var dgray = new SolidColorBrush(Colors.DarkGray);
         var white = new SolidColorBrush(Colors.White);
-        var lblue = new SolidColorBrush(Colors.LightBlue);
+        var lblue = new SolidColorBrush(Colors.Black);
 
         foreach (var node in _graph.Nodes)
         {
