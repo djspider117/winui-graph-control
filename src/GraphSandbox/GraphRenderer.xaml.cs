@@ -7,10 +7,12 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices.Marshalling;
 using Windows.Foundation;
 using Windows.UI;
 
@@ -32,7 +34,6 @@ public sealed partial class GraphRenderer : UserControl
     private void GraphRenderer_Loaded(object sender, RoutedEventArgs e)
     {
         Loaded -= GraphRenderer_Loaded;
-
     }
 
     private void NodeCanvas_CreateResources(CanvasAnimatedControl sender, CanvasCreateResourcesEventArgs args)
@@ -46,10 +47,20 @@ public sealed partial class GraphRenderer : UserControl
             return;
 
         var ds = args.DrawingSession;
+
+        if (_requestInvalidate)
+        {
+            _state.Invalidate(sender);
+            _requestInvalidate = false;
+        }
+
         foreach ((var _, var node) in _state.Nodes)
         {
             ds.FillRoundedRectangle(node.Rect, node.Radius, node.Radius, node.Background);
-            ds.DrawRoundedRectangle(node.Rect, node.Radius, node.Radius, node.BorderColor, node.BorderThickness);
+            if (node.Data.Selected)
+                ds.DrawRoundedRectangle(node.Rect, node.Radius, node.Radius, Colors.Red, node.BorderThickness);
+            else
+                ds.DrawRoundedRectangle(node.Rect, node.Radius, node.Radius, node.BorderColor, node.BorderThickness);
             ds.DrawTextLayout(node.TextLayout, node.TitleLocation, Colors.White);
 
             RenderProperties(node.InputProperties, ds);
@@ -71,10 +82,121 @@ public sealed partial class GraphRenderer : UserControl
     {
         foreach (var prop in propData)
         {
-            ds.FillCircle(prop.CanvasPosition, prop.Radius, Colors.White);
+            ds.FillCircle(prop.CanvasPosition, prop.Radius, prop.MouseOver ? Colors.Red : Colors.White);
             ds.DrawTextLayout(prop.TextLayout, prop.TextPosition, Colors.White);
         }
     }
+
+    private bool _pressed;
+    private bool _moved;
+    private Node? _selectedNode;
+    private Point _startPoint;
+    private Point _lastPoint;
+    private bool _requestInvalidate;
+    private NodeRenderData? _draggingState;
+    private PropertyRenderData? _lastPort;
+    //private object? _lastHitObject;
+    //private HitTestResultType _lastHitType;
+
+    public const float MAX_DISTANCE = 2;
+
+    protected override void OnPointerPressed(PointerRoutedEventArgs e)
+    {
+        _pressed = true;
+        _startPoint = e.GetCurrentPoint(this).Position;
+        _lastPoint = _startPoint;
+        base.OnPointerPressed(e);
+    }
+
+    protected override void OnPointerMoved(PointerRoutedEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        _moved = true;
+
+        var curPt = e.GetCurrentPoint(this).Position;
+
+        var htBox = _state.HitTest(curPt, out var type);
+
+        if (_lastPort != null)
+            _lastPort.MouseOver = false;
+
+        if (type == HitTestResultType.PropertyPort)
+        {
+            _lastPort = htBox as PropertyRenderData;
+            _lastPort!.MouseOver = true;
+        }
+
+        var distance = Vector2.Distance(_startPoint.ToVector2(), curPt.ToVector2());
+        if (distance < MAX_DISTANCE)
+            _moved = false;
+
+        if (!_moved || !_pressed)
+        {
+            _lastPoint = curPt;
+            return;
+        }
+
+        if (type == HitTestResultType.NodeBody)
+        {
+            if (_draggingState == null)
+                _draggingState = htBox as NodeRenderData;
+
+            if (_draggingState == null)
+            {
+                _lastPoint = curPt;
+                return;
+            }
+
+            var delta = curPt.ToVector2() - _lastPoint.ToVector2();
+            _draggingState.Data.Position += delta;
+
+            _lastPoint = curPt;
+            _requestInvalidate = true;
+        }
+
+    }
+
+    protected override void OnPointerReleased(PointerRoutedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+        _draggingState = null;
+
+        var distance = Vector2.Distance(_startPoint.ToVector2(), e.GetCurrentPoint(this).Position.ToVector2());
+        if (distance < MAX_DISTANCE)
+            _moved = false;
+
+        if (_pressed && !_moved)
+        {
+            //CLICK
+            _pressed = false;
+            _moved = false;
+
+            var pt = e.GetCurrentPoint(this).Position;
+            var htBox = _state.HitTest(pt, out var type);
+
+            if (type == HitTestResultType.NodeBody)
+            {
+                var ht = htBox as NodeRenderData;
+
+                if (_selectedNode != null)
+                    _selectedNode.Selected = false;
+
+                if (ht == null)
+                    return;
+
+                ht.Data.Selected = true;
+                _selectedNode = ht.Data;
+                return;
+            }
+        }
+
+
+        _pressed = false;
+        _moved = false;
+        // RELEASE AFTER DRAG
+    }
+
+    //todo add all the pointer events
 }
 
 public class GraphRenderState
@@ -89,6 +211,8 @@ public class GraphRenderState
     public GraphRenderState(Graph graph)
     {
         _graph = graph;
+
+        // TODO: implement hittesting with quadtree
     }
 
     public void Cleanup()
@@ -109,6 +233,7 @@ public class GraphRenderState
             value.Dispose();
         }
         Nodes.Clear();
+        Connections.Clear();
     }
 
     public void Invalidate(ICanvasResourceCreator rc)
@@ -150,7 +275,7 @@ public class GraphRenderState
             var offsetX = 15;
             var offsetY = (float)layout.LayoutBounds.Height + 10;
             int i = 0;
-            foreach (var prop in node.InputProperties)
+            foreach (var prop in node.TypeDefinition.InputProperties)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
@@ -169,12 +294,12 @@ public class GraphRenderState
 
             offsetX = nodeWidth - offsetX;
             i = 0;
-            foreach (var prop in node.OutputProperties)
+            foreach (var prop in node.TypeDefinition.OutputProperties)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
                 layout = new CanvasTextLayout(rc, prop.Name, textFormat10, float.MaxValue, float.MaxValue);
-                
+
                 nrd.OutputProperties.Add(new PropertyRenderData(
                    prop,
                    Colors.Gray,
@@ -198,7 +323,7 @@ public class GraphRenderState
             var dstProp = targetNodeData.InputProperties.First(x => x.Data.PropertyId == conn.TargetPropertyId);
 
             Connections.Add(new ConnectionRenderData(conn,
-                2, Colors.Black,
+                2, Colors.White,
                 srcProp.CanvasPosition,
                 dstProp.CanvasPosition,
                 new Vector2(srcProp.CanvasPosition.X + 32, srcProp.CanvasPosition.Y),
@@ -206,6 +331,53 @@ public class GraphRenderState
         }
         IsRenderable = true;
     }
+
+    public object? HitTest(Point position, out HitTestResultType resultType)
+    {
+        resultType = HitTestResultType.None;
+
+        var p = position.ToVector2();
+        foreach (var item in Nodes.Values)
+        {
+            if (item.Rect.Contains(position))
+            {
+                foreach (var iprop in item.InputProperties)
+                {
+                    var dst = Vector2.DistanceSquared(iprop.CanvasPosition, p);
+                    if (dst <= MathF.Pow(iprop.Radius, 2))
+                    {
+                        resultType = HitTestResultType.PropertyPort;
+                        return iprop;
+                    }
+                }
+
+                foreach (var oprop in item.OutputProperties)
+                {
+                    var dst = Vector2.DistanceSquared(oprop.CanvasPosition, p);
+                    if (dst <= MathF.Pow(oprop.Radius, 2))
+                    {
+                        resultType = HitTestResultType.PropertyPort;
+                        return oprop;
+                    }
+                }
+
+                resultType = HitTestResultType.NodeBody;
+                return item;
+            }
+        }
+
+        return null;
+    }
+}
+
+public enum HitTestResultType
+{
+    None,
+    NodeBody,
+    PropertyText,
+    PropertyPort,
+    Title,
+    Connection
 }
 
 public sealed partial record NodeRenderData(Node Data,
@@ -227,14 +399,16 @@ public sealed partial record NodeRenderData(Node Data,
     }
 }
 
-public sealed partial record PropertyRenderData(NodeProperty Data, 
-    Color Color, 
+public sealed partial record PropertyRenderData(NodeProperty Data,
+    Color Color,
     Vector2 CanvasPosition,
     Vector2 TextPosition,
     CanvasTextFormat TextFormat,
     CanvasTextLayout TextLayout,
     float Radius) : IDisposable
 {
+    public bool MouseOver { get; set; }
+
     public void Dispose()
     {
         TextFormat?.Dispose();
@@ -242,9 +416,9 @@ public sealed partial record PropertyRenderData(NodeProperty Data,
     }
 }
 
-public record ConnectionRenderData(Connection Data, 
-    float Thickness, 
-    Color Color, 
+public record ConnectionRenderData(Connection Data,
+    float Thickness,
+    Color Color,
     Vector2 Start,
     Vector2 End,
     Vector2 Control1,

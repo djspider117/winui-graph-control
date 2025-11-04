@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Numerics;
 
 namespace GraphData;
 

@@ -6,85 +6,60 @@ public static class DemoData
     {
         var rv = new Graph();
 
-        var rectNode = NodeBuilder.Create("Rect")
-            .WithPosition(50, 50)
-            .WithInputProperties(KnownProperty.Transform, KnownProperty.Color, KnownProperty.Size)
-            .WithOutputProperty(KnownProperty.Texture)
+        var rectTypedef = NodeTypeDefinitionBuilder.Create("Rect")
+            .WithInputProperty("Transform", KnownPropertyType.Matrix3x2)
+            .WithInputProperty("Color", KnownPropertyType.Vector4)
+            .WithInputProperty("Size", KnownPropertyType.Vector2)
+            .WithOutputProperty("Output", KnownPropertyType.Texture2D)
             .Build();
 
-        var textNode = NodeBuilder.Create("SimpleText")
-            .WithPosition(50, 260)
-            .WithInputProperties(KnownProperty.Transform, KnownProperty.Color, KnownProperty.Text)
-            .WithOutputProperty(KnownProperty.Texture)
+        var simpleTextTypedef = NodeTypeDefinitionBuilder.Create("SimpleText")
+            .WithInputProperty("Transform", KnownPropertyType.Matrix3x2)
+            .WithInputProperty("Color", KnownPropertyType.Vector4)
+            .WithInputProperty("Text", KnownPropertyType.String)
+            .WithOutputProperty("Output", KnownPropertyType.Texture2D)
             .Build();
 
-        var merge = NodeBuilder.Create("Merge")
-            .WithPosition(240, 150)
-            .WithInputProperty(KnownProperty.Texture)
-            .WithInputProperty(MetadataCache.GetPropertyByName("Texture2"))
-            .WithInputProperty(MetadataCache.GetPropertyByName("Mask"))
-            .WithOutputProperty(KnownProperty.Texture)
+        var mergeTypedef = NodeTypeDefinitionBuilder.Create("Merge")
+            .WithInputProperty("A", KnownPropertyType.Texture2D)
+            .WithInputProperty("B", KnownPropertyType.Texture2D)
+            .WithInputProperty("Mask", KnownPropertyType.Texture2D)
+            .WithOutputProperty("Output", KnownPropertyType.Texture2D)
             .Build();
 
-        var renderer = NodeBuilder.Create("Renderer")
-            .WithPosition(420, 150)
-            .WithInputProperty(KnownProperty.Texture)
+        var rendererTypedef = NodeTypeDefinitionBuilder.Create("Renderer")
+            .WithInputProperty("Texture", KnownPropertyType.Texture2D)
             .Build();
 
-        rv.Nodes.AddRange(rectNode, textNode, merge, renderer);
-        rv.Connections.Add(new Connection(rectNode.Id, (uint)KnownProperty.Texture, merge.Id, (uint)KnownProperty.Texture));
-        rv.Connections.Add(new Connection(textNode.Id, (uint)KnownProperty.Texture, merge.Id, MetadataCache.GetPropertyByName("Texture2").PropertyId));
-        rv.Connections.Add(new Connection(merge.Id, (uint)KnownProperty.Texture, renderer.Id, (uint)KnownProperty.Texture));
+        var nRect1 = new Node(rectTypedef, 0, "Rect1", new(50, 50));
+        var nText = new Node(simpleTextTypedef, 1, "Text", new(50, 260));
+        var nRect2 = new Node(rectTypedef, 2, "Rect2", new(50, 460));
+        var nMerge = new Node(mergeTypedef, 3, "Merge", new(240, 150));
+        var nRenderer = new Node(rendererTypedef, 4, "Renderer", new(420, 150));
+
+        rv.Nodes.AddRange(nRect1, nRect2, nText, nMerge, nRenderer);
+
+        
+        rv.Connections.Add(new Connection(
+            nRect1.Id,
+            nRect1.GetOutputProperty("Output").PropertyId,
+            nMerge.Id,
+            nMerge.GetInputProperty("A").PropertyId));
+
+        rv.Connections.Add(new Connection(
+            nText.Id,
+            nText.GetOutputProperty("Output").PropertyId,
+            nMerge.Id,
+            nMerge.GetInputProperty("B").PropertyId));
+
+        rv.Connections.Add(new Connection(
+            nMerge.Id,
+            nMerge.GetOutputProperty("Output").PropertyId,
+            nRenderer.Id,
+            nRenderer.GetInputProperty("Texture").PropertyId));
 
         rv.RebuildNodeCache();
 
-        return rv;
-    }
-
-    public static Graph BuildNukeStyleGraph()
-    {
-        var rv = new Graph();
-
-        var readNode1 = NodeBuilder.Create("Read A")
-            .WithPosition(110,50)
-            .WithOutputProperty(KnownProperty.Texture)
-            .Build();
-
-        var readNode2 = NodeBuilder.Create("Read B")
-            .WithPosition(311, 50)
-            .WithOutputProperty(KnownProperty.Texture)
-            .Build();
-
-        var readNode3 = NodeBuilder.Create("Read C")
-            .WithPosition(500, 50)
-            .WithOutputProperty(KnownProperty.Texture)
-            .Build();
-
-        var merge1 = NodeBuilder.Create("Merge")
-            .WithPosition(311, 150)
-            .WithInputProperty(KnownProperty.Texture)
-            .WithInputProperty(MetadataCache.GetPropertyByName("Texture2"))
-            .WithInputProperty(MetadataCache.GetPropertyByName("Mask"))
-            .WithOutputProperty(KnownProperty.Texture)
-            .Build();
-
-        var merge2 = NodeBuilder.Create("Merge")
-            .WithPosition(450, 302)
-            .WithInputProperty(KnownProperty.Texture)
-            .WithInputProperty(MetadataCache.GetPropertyByName("Texture2"))
-            .WithInputProperty(MetadataCache.GetPropertyByName("Mask"))
-            .WithOutputProperty(KnownProperty.Texture)
-            .Build();
-
-        rv.Nodes.AddRange(readNode1, readNode2, readNode3, merge1, merge2);
-        rv.Connections.Add(new Connection(readNode1.Id, (uint)KnownProperty.Texture, merge1.Id, (uint)KnownProperty.Texture));
-        rv.Connections.Add(new Connection(readNode2.Id, (uint)KnownProperty.Texture, merge1.Id, MetadataCache.GetPropertyByName("Texture2").PropertyId));
-        rv.Connections.Add(new Connection(readNode3.Id, (uint)KnownProperty.Texture, merge1.Id, MetadataCache.GetPropertyByName("Mask").PropertyId));
-
-        rv.Connections.Add(new Connection(merge1.Id, (uint)KnownProperty.Texture, merge2.Id, (uint)KnownProperty.Texture));
-        rv.Connections.Add(new Connection(readNode3.Id, (uint)KnownProperty.Texture, merge2.Id, MetadataCache.GetPropertyByName("Texture2").PropertyId));
-
-        rv.RebuildNodeCache();
         return rv;
     }
 }

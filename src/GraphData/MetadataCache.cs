@@ -1,32 +1,117 @@
 ﻿using System.Collections.Frozen;
+using System.Xml.Linq;
 
 namespace GraphData;
 
 public static class MetadataCache
 {
-    private static readonly FrozenDictionary<uint, NodeProperty> _propertyCache;
+    private static IDictionary<uint, NodeProperty> _propertyCache = new Dictionary<uint, NodeProperty>();
+    private static IDictionary<uint, NodeTypeDefinition> _nodeCache = new Dictionary<uint, NodeTypeDefinition>();
+    private static IDictionary<string, NodeTypeDefinition> _nodeStringCache = new Dictionary<string, NodeTypeDefinition>();
 
-    static MetadataCache()
-    {
-        _propertyCache = InitProperties();
-    }
+    private static readonly Lock _lock = new();
+    private static uint _globalIdCounter;
 
-    private static FrozenDictionary<uint, NodeProperty> InitProperties()
+    public static void Freeze()
     {
-        var dic = new Dictionary<uint, NodeProperty>
+        lock (_lock)
         {
-            { 0, new NodeProperty(0, nameof(KnownProperty.Transform), (uint)KnownPropertyType.Matrix) },
-            { 1, new NodeProperty(1, nameof(KnownProperty.Color), (uint)KnownPropertyType.Vector4) },
-            { 3, new NodeProperty(3, nameof(KnownProperty.Text), (uint)KnownPropertyType.String) },
-            { 4, new NodeProperty(4, nameof(KnownProperty.Size), (uint)KnownPropertyType.Vector2) },
-            { 5, new NodeProperty(5, nameof(KnownProperty.Texture), (uint)KnownPropertyType.Texture2D) },
-            { 6, new NodeProperty(6, $"{nameof(KnownProperty.Texture)}2", (uint)KnownPropertyType.Texture2D) },
-            { 7, new NodeProperty(7, "Mask", (uint)KnownPropertyType.Texture2D) },
-        };
+            if (_propertyCache != null)
+                _propertyCache = _propertyCache.ToFrozenDictionary(x => x.Key, x => x.Value);
 
-        return dic.ToFrozenDictionary();
+            if (_nodeCache != null)
+                _nodeCache = _nodeCache.ToFrozenDictionary(x => x.Key, x => x.Value);
+        }
     }
 
-    public static NodeProperty GetKnownProperty(KnownProperty prop) => _propertyCache[(uint)prop];
-    public static NodeProperty GetPropertyByName(string name) => _propertyCache.Values.First(x => x.Name == name);
+    public static NodeTypeDefinition GetOrRegisterTypeDefinition(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+
+        if (_nodeStringCache.TryGetValue(name, out var existing))
+            return existing;
+
+        var id = GetNextId();
+        var node = new NodeTypeDefinition(id, name);
+        _nodeCache.Add(node.TypeId, node);
+        _nodeStringCache.Add(name, node);
+        return node;
+    }
+
+    public static NodeProperty RegisterInputPropertyForType(uint nodeType, string name, uint propTypeId)
+    {
+        if (!_nodeCache.TryGetValue(nodeType, out var existing))
+            throw new InvalidOperationException("Not found");
+
+        var prop = new NodeProperty(GetNextId(), name, propTypeId);
+        existing.InputProperties.Add(prop);
+
+        _propertyCache.Add(prop.PropertyId, prop);
+
+        return prop;
+    }
+    public static NodeProperty RegisterOutputPropertyForType(uint nodeType, string name, uint propTypeId)
+    {
+        if (!_nodeCache.TryGetValue(nodeType, out var existing))
+            throw new InvalidOperationException("Not found");
+
+        var prop = new NodeProperty(GetNextId(), name, propTypeId);
+        existing.OutputProperties.Add(prop);
+
+        _propertyCache.Add(prop.PropertyId, prop);
+
+        return prop;
+    }
+
+    public static uint GetNextId() => ++_globalIdCounter;
+
+    public static NodeProperty GetProperty(uint propType)
+    {
+        if (_propertyCache.TryGetValue(propType, out var existing))
+            return existing;
+
+        throw new InvalidOperationException("Not found");
+    }
+    public static NodeProperty GetInputProperty(uint nodeType, string propName)
+    {
+        if (!_nodeCache.TryGetValue(nodeType, out var node))
+            throw new InvalidOperationException("Not found");
+
+        return node.InputProperties.Find(x => x.Name == propName);
+    }
+    public static NodeProperty GetInputProperty(string nodeTypeName, string propName)
+    {
+        if (!_nodeStringCache.TryGetValue(nodeTypeName, out var node))
+            throw new InvalidOperationException("Not found");
+
+        return node.InputProperties.Find(x => x.Name == propName);
+    }
+
+    public static NodeProperty GetOutputProperty(uint nodeType, string propName)
+    {
+        if (!_nodeCache.TryGetValue(nodeType, out var node))
+            throw new InvalidOperationException("Not found");
+
+        return node.OutputProperties.Find(x => x.Name == propName);
+    }
+    public static NodeProperty GetOutputProperty(string nodeTypeName, string propName)
+    {
+        if (!_nodeStringCache.TryGetValue(nodeTypeName, out var node))
+            throw new InvalidOperationException("Not found");
+
+        return node.OutputProperties.Find(x => x.Name == propName);
+    }
+}
+
+public static class NodeTypeDefExtensions
+{
+    public static NodeProperty GetInputProperty(this Node node, string propName)
+    {
+        return MetadataCache.GetInputProperty(node.TypeDefinition.TypeId, propName);
+    }
+
+    public static NodeProperty GetOutputProperty(this Node node, string propName)
+    {
+        return MetadataCache.GetOutputProperty(node.TypeDefinition.TypeId, propName);
+    }
 }
