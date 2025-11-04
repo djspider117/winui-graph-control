@@ -69,15 +69,45 @@ public sealed partial class GraphRenderer : UserControl
 
         foreach (var conn in _state.Connections)
         {
-            var builder = new CanvasPathBuilder(sender);
-            builder.BeginFigure(conn.Start);
-            builder.AddCubicBezier(conn.Control1, conn.Control2, conn.End);
-            builder.EndFigure(CanvasFigureLoop.Open);
-
-            var geom = CanvasGeometry.CreatePath(builder);
-            ds.DrawGeometry(geom, conn.Color, conn.Thickness);
+            RenderConnection(sender, ds, conn);
         }
     }
+
+    private static void RenderConnection(ICanvasAnimatedControl sender, CanvasDrawingSession ds, ConnectionRenderData conn)
+    {
+        var builder = new CanvasPathBuilder(sender);
+        builder.BeginFigure(conn.Start);
+        builder.AddCubicBezier(conn.Control1, conn.Control2, conn.End - new Vector2(14,0));
+        builder.EndFigure(CanvasFigureLoop.Open);
+
+        var geom = CanvasGeometry.CreatePath(builder);
+        ds.DrawGeometry(geom, conn.Color, conn.Thickness);
+
+        Vector2 tangent = 3 * (conn.Control2 - conn.End);
+        if (tangent.LengthSquared() < 1e-6f)
+            tangent = Vector2.Normalize(conn.End - conn.Start); // fallback if degenerate
+        else
+            tangent = Vector2.Normalize(tangent);
+
+        float arrowLength = 15f;
+        float arrowAngle = 25f * (float)(Math.PI / 180.0); // 25 degrees
+
+        var a = Matrix3x2.CreateRotation(arrowAngle);
+        var b = Matrix3x2.CreateRotation(-arrowAngle);
+
+        Vector2 right = Vector2.Transform(tangent, a) * arrowLength;
+        Vector2 left = Vector2.Transform(tangent, b) * arrowLength;
+
+        Vector2 tip = conn.End;
+        Vector2 pLeft = tip + left;
+        Vector2 pRight = tip + right;
+
+        ds.FillGeometry(
+            CanvasGeometry.CreatePolygon(ds, new[] { tip, pLeft, pRight }),
+            Colors.White
+        );
+    }
+
     private static void RenderProperties(List<PropertyRenderData> propData, CanvasDrawingSession ds)
     {
         foreach (var prop in propData)
@@ -272,7 +302,7 @@ public class GraphRenderState
 
             Nodes.Add(node.Id, nrd);
 
-            var offsetX = 15;
+            var offsetX = 8;
             var offsetY = (float)layout.LayoutBounds.Height + 10;
             int i = 0;
             foreach (var prop in node.TypeDefinition.InputProperties)
