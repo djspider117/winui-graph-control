@@ -140,6 +140,9 @@ public sealed partial class GraphRenderer : UserControl
 
     protected override void OnPointerMoved(PointerRoutedEventArgs e)
     {
+        // TODO: when using quadtree, and dragging a node, extract it from the tree while it's moving around
+        // then reinsert it. this will keep the system from invalidating the qt
+
         base.OnPointerMoved(e);
         _moved = true;
 
@@ -228,17 +231,22 @@ public sealed partial class GraphRenderer : UserControl
 
     //todo add all the pointer events
 }
+internal class NodeRenderDataBoundsSelector : IBoundsSelector<NodeRenderData>
+{
+    public Quad GetBounds(NodeRenderData data) => new(data.Rect.X, data.Rect.Y, 150, 150);
+}
+
+internal class NodeRenderDataCluster : Cluster<NodeRenderData, NodeRenderDataBoundsSelector>
+{
+    public NodeRenderDataCluster(Quad bounds, int id) : base(bounds, id)
+    {
+    }
+}
 
 public class GraphRenderState
 {
     private Graph _graph;
-    private QuadTree<NodeRenderData> _qt;
-
-
-    private class NodeRenderDataBoundsSelector : IBoundsSelector<NodeRenderData>
-    {
-        public Vector4 GetBounds(NodeRenderData value) => new ((float)value.Rect.Left, (float)value.Rect.Top, (float)value.Rect.Right, (float)value.Rect.Bottom);
-    }
+    private NodeRenderDataCluster _cluster;
 
     public Dictionary<uint, NodeRenderData> Nodes { get; set; } = [];
     public List<ConnectionRenderData> Connections { get; set; } = [];
@@ -248,9 +256,7 @@ public class GraphRenderState
     public GraphRenderState(Graph graph)
     {
         _graph = graph;
-        _qt = new QuadTree<NodeRenderData>(-500f, -500f, 2000f, 2000f, new NodeRenderDataBoundsSelector(), 11111, 20);
-
-        // TODO: implement hittesting with quadtree
+        _cluster = new NodeRenderDataCluster(new Quad(-200, -200, 2000, 2000), 99999);
     }
 
     public void Cleanup()
@@ -272,7 +278,7 @@ public class GraphRenderState
         }
         Nodes.Clear();
         Connections.Clear();
-        _qt.Clear();
+        _cluster.Clear();
     }
 
     public void Invalidate(ICanvasResourceCreator rc)
@@ -310,7 +316,7 @@ public class GraphRenderState
                 [], []);
 
             Nodes.Add(node.Id, nrd);
-            _qt.Insert(nrd);
+            _cluster.Insert(nrd);
 
             var offsetX = 8;
             var offsetY = (float)layout.LayoutBounds.Height + 10;
@@ -378,9 +384,7 @@ public class GraphRenderState
 
         var p = position.ToVector2();
 
-        
-
-        foreach (var item in Nodes.Values)
+        foreach (var item in _cluster.Query(position))
         {
             if (item.Rect.Contains(position))
             {
