@@ -6,9 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\GhostCore\GhostCore.Data.Evaluation.SourceGen\GhostCore.Data.Evaluation.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-    <ProjectReference Include="..\..\..\GhostCore\GhostCore.Data.Evaluation\GhostCore.Data.Evaluation.csproj" />
-  </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Include="GhostCore.Data.Evaluation" Version="1.0.0" />
+		<PackageReference Include="GhostCore.Data.Evaluation.SourceGen" Version="1.0.0" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
 </Project>

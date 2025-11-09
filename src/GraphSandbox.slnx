@@ -3,8 +3,6 @@
     <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="../../GhostCore/GhostCore.Data.Evaluation.SourceGen/GhostCore.Data.Evaluation.SourceGen.csproj" />
-  <Project Path="../../GhostCore/GhostCore.Data.Evaluation/GhostCore.Data.Evaluation.csproj" />
   <Project Path="GraphData/GraphData.csproj" Id="f5da2ddb-febf-4ea8-9450-b4faf212015e" />
   <Project Path="GraphSandbox/GraphSandbox.csproj">
     <Platform Solution="*|ARM64" Project="ARM64" />
