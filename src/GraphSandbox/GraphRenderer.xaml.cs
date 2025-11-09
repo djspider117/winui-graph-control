@@ -1,3 +1,4 @@
+using GhostCore.Data.Evaluation;
 using GraphData;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Geometry;
@@ -38,7 +39,13 @@ public sealed partial class GraphRenderer : UserControl
 
     private void NodeCanvas_CreateResources(CanvasAnimatedControl sender, CanvasCreateResourcesEventArgs args)
     {
-        _state.Invalidate(sender);
+        try
+        {
+            _state.Invalidate(sender);
+        }
+        catch (Exception ex)
+        {
+        }
     }
 
     private void NodeCanvas_Draw(ICanvasAnimatedControl sender, CanvasAnimatedDrawEventArgs args)
@@ -57,7 +64,7 @@ public sealed partial class GraphRenderer : UserControl
         foreach ((var _, var node) in _state.Nodes)
         {
             ds.FillRoundedRectangle(node.Rect, node.Radius, node.Radius, node.Background);
-            if (node.Data.Selected)
+            if (node.RenderData.Selected)
                 ds.DrawRoundedRectangle(node.Rect, node.Radius, node.Radius, Colors.Red, node.BorderThickness);
             else
                 ds.DrawRoundedRectangle(node.Rect, node.Radius, node.Radius, node.BorderColor, node.BorderThickness);
@@ -77,7 +84,7 @@ public sealed partial class GraphRenderer : UserControl
     {
         var builder = new CanvasPathBuilder(sender);
         builder.BeginFigure(conn.Start);
-        builder.AddCubicBezier(conn.Control1, conn.Control2, conn.End - new Vector2(14,0));
+        builder.AddCubicBezier(conn.Control1, conn.Control2, conn.End - new Vector2(14, 0));
         builder.EndFigure(CanvasFigureLoop.Open);
 
         var geom = CanvasGeometry.CreatePath(builder);
@@ -181,7 +188,7 @@ public sealed partial class GraphRenderer : UserControl
             }
 
             var delta = curPt.ToVector2() - _lastPoint.ToVector2();
-            _draggingState.Data.Position += delta;
+            _draggingState.RenderData.Position += delta;
 
             _lastPoint = curPt;
             _requestInvalidate = true;
@@ -217,8 +224,8 @@ public sealed partial class GraphRenderer : UserControl
                 if (ht == null)
                     return;
 
-                ht.Data.Selected = true;
-                _selectedNode = ht.Data;
+                ht.RenderData.Selected = true;
+                _selectedNode = ht.RenderData;
                 return;
             }
         }
@@ -321,7 +328,7 @@ public class GraphRenderState
             var offsetX = 8;
             var offsetY = (float)layout.LayoutBounds.Height + 10;
             int i = 0;
-            foreach (var prop in node.TypeDefinition.InputProperties)
+            foreach (var prop in node.DataObject.TypeDefinition.Inputs)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
@@ -340,7 +347,7 @@ public class GraphRenderState
 
             offsetX = nodeWidth - offsetX;
             i = 0;
-            foreach (var prop in node.TypeDefinition.OutputProperties)
+            foreach (var prop in node.DataObject.TypeDefinition.Outputs)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
@@ -365,8 +372,8 @@ public class GraphRenderState
             var targetNodeData = Nodes[conn.TargetNodeId];
 
             // TODO make properties dictionaries
-            var srcProp = srcNodeData.OutputProperties.First(x => x.Data.PropertyId == conn.SourcePropertyId);
-            var dstProp = targetNodeData.InputProperties.First(x => x.Data.PropertyId == conn.TargetPropertyId);
+            var srcProp = srcNodeData.OutputProperties.First(x => x.Data.Id == conn.SourcePropertyId);
+            var dstProp = targetNodeData.InputProperties.First(x => x.Data.Id == conn.TargetPropertyId);
 
             Connections.Add(new ConnectionRenderData(conn,
                 2, Colors.White,
@@ -427,7 +434,7 @@ public enum HitTestResultType
     Connection
 }
 
-public sealed partial record NodeRenderData(Node Data,
+public sealed partial record NodeRenderData(Node RenderData,
     Color BorderColor,
     float BorderThickness,
     Color Background,
@@ -446,7 +453,7 @@ public sealed partial record NodeRenderData(Node Data,
     }
 }
 
-public sealed partial record PropertyRenderData(NodeProperty Data,
+public sealed partial record PropertyRenderData(PortInfo Data,
     Color Color,
     Vector2 CanvasPosition,
     Vector2 TextPosition,
