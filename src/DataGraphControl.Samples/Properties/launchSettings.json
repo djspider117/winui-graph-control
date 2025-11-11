@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DataGraphControl.Samples (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "DataGraphControl.Samples (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
