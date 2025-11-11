@@ -18,7 +18,7 @@ public partial class TextProperties : DependencyObject
 
     [GeneratedDependencyProperty(DefaultValueCallback = nameof(GetFontWeightDefault))]
     public partial FontWeight FontWeight { get; set; }
-    internal static FontWeight GetFontWeightDefault => FontWeights.Normal;
+    internal static object GetFontWeightDefault() => FontWeights.Normal;
 
     [GeneratedDependencyProperty]
     public partial FontStyle FontStyle { get; set; }

@@ -35,7 +35,7 @@ public enum HitTestResultType
     Connection
 }
 
-public sealed partial record NodeRenderData(EvaluatableNode RenderData,
+public sealed partial record NodeRenderData(INode RenderData,
     Color BorderColor,
     float BorderThickness,
     Color Background,

@@ -24,7 +24,7 @@ public sealed partial class DataGraphView : UserControl
 
     [GeneratedDependencyProperty(DefaultValueCallback = nameof(GetNodeStyleDefinitionDefault))]
     public partial NodeStyleDefinition NodeStyleDefinition { get; set; }
-    private static NodeStyleDefinition GetNodeStyleDefinitionDefault => NodeStyleDefinition.Default;
+    private static NodeStyleDefinition GetNodeStyleDefinitionDefault() => NodeStyleDefinition.Default;
     partial void OnNodeStyleDefinitionPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
         if (e.OldValue is NodeStyleDefinition old)

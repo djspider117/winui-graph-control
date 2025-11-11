@@ -97,7 +97,7 @@ public class GraphRenderState
             var offsetX = 8;
             var offsetY = (float)layout.LayoutBounds.Height + 10;
             int i = 0;
-            foreach (var prop in node.Data.TypeDefinition.Inputs)
+            foreach (var prop in node.TypeDefinition.Inputs)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
@@ -116,7 +116,7 @@ public class GraphRenderState
 
             offsetX = nodeWidth - offsetX;
             i = 0;
-            foreach (var prop in node.Data.TypeDefinition.Outputs)
+            foreach (var prop in node.TypeDefinition.Outputs)
             {
                 var centerRow = rowHeight / 2 + offsetY + i * rowHeight + node.Position.Y;
 
