@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
@@ -11,7 +11,12 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+	  <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Samples\0_UnityStyleSample.xaml" />
+    <None Remove="Samples\1_NukeStyleSample.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -38,12 +43,23 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6901" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251003001" />
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\GhostCore\GhostCore.Data.Evaluation.SourceGen\GhostCore.Data.Evaluation.SourceGen.csproj" />
+	  <ProjectReference Include="..\..\..\GhostCore\GhostCore.Data.Evaluation.SourceGen\GhostCore.Data.Evaluation.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\..\..\GhostCore\GhostCore.Data.Evaluation\GhostCore.Data.Evaluation.csproj" />
     <ProjectReference Include="..\DataGraphControl.Core\DataGraphControl.Core.csproj" />
     <ProjectReference Include="..\DataGraphControl.WinUI\DataGraphControl.WinUI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Samples\1_NukeStyleSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Samples\0_UnityStyleSample.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

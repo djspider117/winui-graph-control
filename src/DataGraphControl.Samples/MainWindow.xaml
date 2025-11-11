@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Window
     x:Class="DataGraphControl.Samples.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -6,15 +5,36 @@
     xmlns:local="using:DataGraphControl.Samples"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:w="using:DataGraphControl.WinUI"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:viewmodels="using:DataGraphControl.Samples.ViewModels"
     mc:Ignorable="d"
     Title="DataGraphControl.Samples">
-
     <Window.SystemBackdrop>
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
     <Grid>
-        <w:DataGraphView />
+        <Grid.DataContext>
+            <viewmodels:MainWindowViewModel />
+        </Grid.DataContext>
+
+        <TextBlock Text="{Binding Title, Mode=OneWay}" HorizontalAlignment="Center"
+                   Margin="0,10,0,0"/>
+
+        <NavigationView x:Name="nav"
+                        MenuItemsSource="{Binding AvailableSamples}"
+                        SelectedItem="{Binding SelectedSample, Mode=TwoWay}"
+                        IsSettingsVisible="False">
+            <NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="viewmodels:Sample">
+                    <NavigationViewItem Content="{x:Bind Title}" ToolTipService.ToolTip="{x:Bind Description}">
+                        <NavigationViewItem.Icon>
+                            <SymbolIcon Symbol="{x:Bind Icon}" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </NavigationView.MenuItemTemplate>
+
+            <Frame x:Name="navFrame" SourcePageType="{Binding SelectedSample.XamlType}" Margin="8,32,8,8" CornerRadius="8"/>
+        </NavigationView>
     </Grid>
 </Window>

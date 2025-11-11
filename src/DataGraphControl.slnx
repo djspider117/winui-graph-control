@@ -7,9 +7,6 @@
     <Project Path="../../GhostCore/GhostCore.Data.Evaluation.SourceGen/GhostCore.Data.Evaluation.SourceGen.csproj" />
     <Project Path="../../GhostCore/GhostCore.Data.Evaluation/GhostCore.Data.Evaluation.csproj" />
   </Folder>
-  <Folder Name="/Libs/Labs/">
-    <Project Path="../Labs/components/DependencyPropertyGenerator/CommunityToolkit.DependencyPropertyGenerator.SourceGenerators/CommunityToolkit.DependencyPropertyGenerator.SourceGenerators.csproj" />
-  </Folder>
   <Project Path="DataGraphControl.Core/DataGraphControl.Core.csproj" Id="df94ccfe-ae58-4297-bfd8-32a5f26b504e" />
   <Project Path="DataGraphControl.Samples/DataGraphControl.Samples.csproj" Id="b206792a-38ee-4db4-b1e0-1dad28f262ef">
     <Platform Solution="*|ARM64" Project="ARM64" />

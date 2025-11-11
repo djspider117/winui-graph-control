@@ -39,4 +39,9 @@ public class DataGraph : ICachedGraph, IEvaluatableGraphConnector
             dest.Id,
             dest.Data.GetInputPort(destPortName).Id));
     }
+
+    public void AddNode(INode node) => _nodes.Add(node);
+    public void AddNodes(params IEnumerable<INode> nodes) => _nodes.AddRange(nodes);
+    public void AddConnection(Connection conn) => _connections.Add(conn);
+
 }

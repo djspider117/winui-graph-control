@@ -13,13 +13,17 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
-namespace DataGraphControl.Samples;
+// To learn more about WinUI, the WinUI project structure,
+// and more about our project templates, see: http://aka.ms/winui-project-info.
 
-public sealed partial class MainWindow : Window
+namespace DataGraphControl.Samples.Samples;
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class NukeStyleSample : Page
 {
-    public MainWindow()
+    public NukeStyleSample()
     {
         InitializeComponent();
-        ExtendsContentIntoTitleBar = true;
     }
 }

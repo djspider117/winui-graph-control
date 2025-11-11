@@ -1,4 +1,5 @@
 using CommunityToolkit.WinUI;
+using DataGraphControl.Core;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -21,6 +22,17 @@ public sealed partial class DataGraphView : UserControl
 {
     private NodeStyleRenderInfo? _nodeStyleRenderInfo;
     private volatile bool _invaldated = false;
+
+    [GeneratedDependencyProperty]
+    public partial IGraph? GraphData { get; set; }
+    partial void OnGraphDataChanged(IGraph? newValue)
+    {
+        if (newValue == null)
+            return;
+
+        // TODO set graph to render state
+        _invaldated = true;
+    }
 
     [GeneratedDependencyProperty(DefaultValueCallback = nameof(GetNodeStyleDefinitionDefault))]
     public partial NodeStyleDefinition NodeStyleDefinition { get; set; }
