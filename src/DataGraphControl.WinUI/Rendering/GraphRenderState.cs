@@ -21,7 +21,7 @@ using Windows.UI;
 namespace DataGraphControl.WinUI.Rendering;
 public class GraphRenderState
 {
-    private IGraph _graph;
+    private IGraph? _graph;
     private NodeRenderDataCluster _cluster;
 
     public Dictionary<uint, NodeRenderData> Nodes { get; set; } = [];
@@ -29,10 +29,16 @@ public class GraphRenderState
 
     public bool IsRenderable { get; private set; }
 
-    public GraphRenderState(IGraph graph)
+    public GraphRenderState(IGraph? graph)
     {
         _graph = graph;
         _cluster = new NodeRenderDataCluster(new Quad(-200, -200, 2000, 2000), 99999);
+    }
+
+    public void ResetGraph(IGraph? graph)
+    {
+        Cleanup();
+        _graph = graph;
     }
 
     public void Cleanup()
@@ -60,6 +66,10 @@ public class GraphRenderState
     public void Invalidate(ICanvasResourceCreator rc)
     {
         Cleanup();
+
+        if (_graph == null)
+            return;
+
         foreach (var node in _graph.Nodes)
         {
             const int nodeWidth = 150;

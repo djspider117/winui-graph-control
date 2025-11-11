@@ -34,7 +34,7 @@
                 </DataTemplate>
             </NavigationView.MenuItemTemplate>
 
-            <Frame x:Name="navFrame" SourcePageType="{Binding SelectedSample.XamlType}" Margin="8,32,8,8" CornerRadius="8"/>
+            <Frame x:Name="navFrame" SourcePageType="{Binding SelectedSample.XamlType}" Margin="16,32,16,16" CornerRadius="8"/>
         </NavigationView>
     </Grid>
 </Window>

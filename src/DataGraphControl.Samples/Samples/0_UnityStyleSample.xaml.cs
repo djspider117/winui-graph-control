@@ -31,7 +31,7 @@ public sealed partial class UnityStyleSample : Page
     private void UnityStyleSample_Loaded(object sender, RoutedEventArgs e)
     {
         var demoData = CreateDemoData();
-        
+        graph.GraphData = demoData;
     }
 
     private IGraph CreateDemoData()
