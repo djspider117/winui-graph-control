@@ -1,4 +1,8 @@
 ﻿using DataGraphControl.Core;
+using DataGraphControl.WinUI.Acceleration;
+using DataGraphControl.WinUI.Rendering.Abstract;
+using DataGraphControl.WinUI.Rendering.Context;
+using DataGraphControl.WinUI.Rendering.Default;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System.Collections.Frozen;
@@ -6,11 +10,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace DataGraphControl.WinUI.Rendering;
-
-public class RenderInfoContext
-{
-    internal NodeStyleRenderInfo? NodeStyleRenderInfo { get; set; }
-}
 
 internal class GraphRenderer
 {
@@ -102,17 +101,4 @@ internal class GraphRenderer
     }
 
     protected virtual ElementRenderContextCluster GetClusterForGraph(IGraph graph) => new(new(-200, -200, 2000, 2000), 99999);
-}
-
-public class GraphRendererCreationParameters
-{
-    public Dictionary<uint, IElementRenderer> NodeRenders { get; } = [];
-    public IElementRenderer DefaultNodeRenderer { get; }
-    public IElementRenderer ConnectionRenderer { get; }
-
-    public GraphRendererCreationParameters(IElementRenderer? nodeRenderer = null, IElementRenderer? connectionRenderer = null)
-    {
-        DefaultNodeRenderer = nodeRenderer ?? new GenericNodeRenderer();
-        ConnectionRenderer = connectionRenderer ?? new GenericConnectionRenderer();
-    }
 }

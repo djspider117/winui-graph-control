@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace DataGraphControl.WinUI.Rendering;
+namespace DataGraphControl.WinUI.Rendering.Context;
 
 public abstract class ElementRenderContext : IDisposable
 {

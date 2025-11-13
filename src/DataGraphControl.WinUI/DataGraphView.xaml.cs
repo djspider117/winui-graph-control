@@ -1,6 +1,7 @@
 using CommunityToolkit.WinUI;
 using DataGraphControl.Core;
 using DataGraphControl.WinUI.Rendering;
+using DataGraphControl.WinUI.Rendering.Default;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI;
 using Microsoft.Graphics.Canvas.UI.Xaml;

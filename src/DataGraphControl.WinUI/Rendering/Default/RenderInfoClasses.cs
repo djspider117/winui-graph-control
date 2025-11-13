@@ -1,12 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DataGraphControl.WinUI;
+namespace DataGraphControl.WinUI.Rendering.Default;
 
 internal interface IRenderInfo { }
 

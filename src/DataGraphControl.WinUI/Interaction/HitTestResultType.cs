@@ -1,4 +1,4 @@
-﻿namespace DataGraphControl.WinUI.Rendering;
+﻿namespace DataGraphControl.WinUI.Interaction;
 
 public enum HitTestResultType
 {

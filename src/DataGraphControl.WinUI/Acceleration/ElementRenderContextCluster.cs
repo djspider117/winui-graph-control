@@ -1,6 +1,6 @@
-﻿using DataGraphControl.WinUI.Acceleration;
+﻿using DataGraphControl.WinUI.Rendering.Context;
 
-namespace DataGraphControl.WinUI.Rendering;
+namespace DataGraphControl.WinUI.Acceleration;
 
 public class ElementRenderContextCluster(Quad bounds, int id) : Cluster<ElementRenderContext, ElementBoundsSelector>(bounds, id);
 

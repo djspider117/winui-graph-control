@@ -1,4 +1,6 @@
 ﻿using DataGraphControl.Core;
+using DataGraphControl.WinUI.Rendering.Abstract;
+using DataGraphControl.WinUI.Rendering.Context;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Geometry;
 using Microsoft.Graphics.Canvas.UI.Xaml;
@@ -7,11 +9,11 @@ using System;
 using System.Linq;
 using System.Numerics;
 
-namespace DataGraphControl.WinUI.Rendering;
+namespace DataGraphControl.WinUI.Rendering.Default;
 
-internal class GenericConnectionRenderer : ElementRenderer<ConnectionRenderData>
+internal class DefaultConnectionRenderer : ElementRenderer<ConnectionRenderContext>
 {
-    public override void LayoutInternal(ICanvasResourceCreator rc, ref ConnectionRenderData ctx, ref GraphRenderState state, ref RenderInfoContext renderInfoContext)
+    public override void LayoutInternal(ICanvasResourceCreator rc, ref ConnectionRenderContext ctx, ref GraphRenderState state, ref RenderInfoContext renderInfoContext)
     {
         var conn = ctx.Data;
 
@@ -31,7 +33,7 @@ internal class GenericConnectionRenderer : ElementRenderer<ConnectionRenderData>
         ctx.End = dstProp.PortPosition;
     }
 
-    public override void RenderInternal(ICanvasResourceCreator rc, CanvasAnimatedDrawEventArgs args, ref ConnectionRenderData context, ref GraphRenderState state, ref RenderInfoContext renderInfoContext)
+    public override void RenderInternal(ICanvasResourceCreator rc, CanvasAnimatedDrawEventArgs args, ref ConnectionRenderContext context, ref GraphRenderState state, ref RenderInfoContext renderInfoContext)
     {
         var ds = args.DrawingSession;
 
@@ -72,6 +74,6 @@ internal class GenericConnectionRenderer : ElementRenderer<ConnectionRenderData>
         if (data == null)
             return ElementRenderContext.Empty;
 
-        return new ConnectionRenderData((Connection)data, 2, Colors.White, Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero);
+        return new ConnectionRenderContext((Connection)data, 2, Colors.White, Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero);
     }
 }

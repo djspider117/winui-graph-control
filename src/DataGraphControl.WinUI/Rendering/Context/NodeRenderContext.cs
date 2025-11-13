@@ -1,17 +1,11 @@
 ﻿using DataGraphControl.Core;
-using DataGraphControl.WinUI.Acceleration;
-using GhostCore.Data.Evaluation;
+using DataGraphControl.WinUI.Rendering.Context;
+using DataGraphControl.WinUI.Rendering.Default;
 using Microsoft.Graphics.Canvas.Brushes;
 using Microsoft.Graphics.Canvas.Text;
-using Microsoft.Graphics.Canvas.UI;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Windows.Foundation;
-using Windows.UI;
 using Windows.UI.Text;
 
 namespace DataGraphControl.WinUI.Rendering;
@@ -85,80 +79,5 @@ internal sealed partial class NodeRenderContext : ElementRenderContext
             item.Dispose();
 
         base.Dispose();
-    }
-}
-
-public partial class ConnectionRenderData(Connection Data,
-    float Thickness,
-    Color Color,
-    Vector2 Start,
-    Vector2 End,
-    Vector2 Control1,
-    Vector2 Control2) : ElementRenderContext
-{
-    public Connection Data { get; } = Data;
-    public float Thickness { get; set; } = Thickness;
-    public Color Color { get; set; } = Color;
-    public Vector2 Start { get; set; } = Start;
-    public Vector2 End { get; set; } = End;
-    public Vector2 Control1 { get; set; } = Control1;
-    public Vector2 Control2 { get; set; } = Control2;
-}
-
-public sealed partial class PropertyRenderContext : ElementRenderContext
-{
-    private CanvasTextFormat? _textFormat;
-    private CanvasTextLayout? _textLayout;
-
-    private CanvasBrushWithStates? _portBrush;
-    private ICanvasBrush? _textBrush;
-
-    public uint Id { get; set; }
-
-    public CanvasBrushWithStates? PortBrush
-    {
-        get => _portBrush;
-        set => SetDisposableProperty(value, ref _portBrush);
-    }
-    public ICanvasBrush? TextBrush
-    {
-        get => _textBrush;
-        set => SetDisposableProperty(value, ref _textBrush);
-    }
-
-    public CanvasTextFormat? TextFormat
-    {
-        get => _textFormat;
-        set => SetDisposableProperty(value, ref _textFormat);
-    }
-    public CanvasTextLayout? TextLayout
-    {
-        get => _textLayout;
-        set => SetDisposableProperty(value, ref _textLayout);
-    }
-
-    public Vector2 PortPosition { get; set; }
-    public float Radius { get; set; }
-}
-
-public sealed partial class CanvasBrushWithStates : IDisposable
-{
-    public ICanvasBrush NormalBrush { get; set; }
-    public ICanvasBrush? MouseOverBrush { get; set; }
-    public ICanvasBrush? PressedBrush { get; set; }
-    public ICanvasBrush? SelectedBrush { get; set; }
-
-    public CanvasBrushWithStates(ICanvasBrush normal, ICanvasBrush? selected = null)
-    {
-        NormalBrush = normal;
-        SelectedBrush = selected;
-    }
-
-    public void Dispose()
-    {
-        NormalBrush?.Dispose();
-        MouseOverBrush?.Dispose();
-        PressedBrush?.Dispose();
-        SelectedBrush?.Dispose();
     }
 }

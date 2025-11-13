@@ -1,4 +1,5 @@
 using CommunityToolkit.WinUI;
+using DataGraphControl.WinUI.Rendering.Default;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Windows.UI.Text;

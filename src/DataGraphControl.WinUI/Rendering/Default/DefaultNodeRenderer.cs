@@ -1,18 +1,16 @@
 ﻿using DataGraphControl.Core;
-using DataGraphControl.WinUI.Acceleration;
 using DataGraphControl.WinUI.Extensions;
+using DataGraphControl.WinUI.Rendering.Abstract;
+using DataGraphControl.WinUI.Rendering.Context;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.Text;
 using Microsoft.Graphics.Canvas.UI.Xaml;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Xml.Linq;
 
-namespace DataGraphControl.WinUI.Rendering;
+namespace DataGraphControl.WinUI.Rendering.Default;
 
-internal class GenericNodeRenderer : ElementRenderer<NodeRenderContext>
+internal class DefaultNodeRenderer : ElementRenderer<NodeRenderContext>
 {
     public override ElementRenderContext CreateContext(ICanvasResourceCreator rc, object? data, ref GraphRenderState state, ref RenderInfoContext renderInfoContext)
     {

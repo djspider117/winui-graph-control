@@ -18,7 +18,7 @@ using System.Runtime.InteropServices.Marshalling;
 using Windows.Foundation;
 using Windows.UI;
 
-namespace DataGraphControl.WinUI.Rendering;
+namespace DataGraphControl.WinUI.Rendering.Context;
 
 public readonly struct GraphRenderState(IGraph graph, ElementRenderContextCluster cluster) : IDisposable
 {

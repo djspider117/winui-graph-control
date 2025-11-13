@@ -1,4 +1,6 @@
 using CommunityToolkit.WinUI;
+using DataGraphControl.WinUI.Extensions;
+using DataGraphControl.WinUI.Rendering.Default;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
