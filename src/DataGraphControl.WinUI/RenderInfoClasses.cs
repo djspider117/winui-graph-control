@@ -16,6 +16,8 @@ internal class NodeStyleRenderInfo : IRenderInfo
     internal Vector2 MinMaxWidth { get; set; }
     internal Vector2 MinMaxHeight { get; set; }
 
+    internal int RowHeight { get; set; }
+
     public float BorderThickness { get; set; }
     internal IBrushProxy? BorderBrush { get; set; }
     internal IBrushProxy? BackgroundBrush { get; set; }

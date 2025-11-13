@@ -25,6 +25,11 @@ public readonly struct Quad
         BottomRight = new(center.X + halfSize, center.Y - halfSize);
 
     }
+    public Quad(Vector2 position, Vector2 size)
+        : this(position.X, position.Y, size.X, size.Y)
+    {
+    }
+
     public Quad(double x, double y, double width, double height)
     {
         TopLeft = new Point(x, y);

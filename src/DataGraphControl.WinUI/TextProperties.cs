@@ -7,11 +7,16 @@ namespace DataGraphControl.WinUI;
 
 public partial class TextProperties : DependencyObject
 {
-    public static readonly TextProperties Common = new()
+    public static readonly TextProperties Common;
+
+    static TextProperties()
     {
-        FontFamily = "Segoe UI",
-        FontSize = 12
-    };
+        Common = new()
+        {
+            FontFamily = "Segoe UI",
+            FontSize = 12
+        };
+    }
 
     [GeneratedDependencyProperty(DefaultValue = "")]
     public partial string FontFamily { get; set; }

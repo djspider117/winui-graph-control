@@ -7,25 +7,25 @@ namespace DataGraphControl.WinUI;
 public partial class PortStyleDefinition : DependencyObject
 {
     [GeneratedDependencyProperty]
-    public partial StatefulBrush PortBrush { get; set; }
+    public partial StatefulBrush? PortBrush { get; set; }
 
     [GeneratedDependencyProperty]
-    public partial Brush TextBrush { get; set; }
+    public partial Brush? TextBrush { get; set; }
 
     [GeneratedDependencyProperty]
     public partial double PortRadius { get; set; }
 
     [GeneratedDependencyProperty]
-    public partial TextProperties TextProperties { get; set; }
+    public partial TextProperties? TextProperties { get; set; }
 
     internal PortStyleRenderInfo GetRenderInfo()
     {
         return new()
         {
-            PortBrush = PortBrush.ToProxy(),
+            PortBrush = PortBrush?.ToProxy(),
             PortRadius = (float)PortRadius,
-            TextBrush = TextBrush.ToBrushProxy(),
-            TextProperties = TextProperties.GetRenderInfo(),
+            TextBrush = TextBrush?.ToBrushProxy(),
+            TextProperties = TextProperties?.GetRenderInfo(),
         };
     }
 }
