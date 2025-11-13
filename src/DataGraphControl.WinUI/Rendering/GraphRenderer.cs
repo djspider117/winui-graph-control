@@ -7,6 +7,7 @@ using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace DataGraphControl.WinUI.Rendering;
@@ -47,8 +48,10 @@ internal class GraphRenderer
         _state.Clean();
     }
 
-    public void Invalidate(ICanvasResourceCreator rc)
+    public void Invalidate(ICanvasAnimatedControl rc)
     {
+        // todo - cluster init
+
         foreach (var node in _state.Graph?.Nodes ?? [])
         {
             var typeId = node.TypeDefinition.TypeId;
@@ -63,9 +66,11 @@ internal class GraphRenderer
         }
     }
 
-    public void Render(ICanvasResourceCreator rc, CanvasAnimatedDrawEventArgs args)
+    public void Render(ICanvasAnimatedControl rc, CanvasAnimatedDrawEventArgs args)
     {
-        foreach (var node in _state.Graph?.Nodes ?? [])
+        var nodes = _state.RestrictedCluster.Query(new Quad(Vector2.Zero, rc.Size.ToVector2()));
+
+        foreach (var node in nodes)
         {
             var typeId = node.TypeDefinition.TypeId;
             var nodeRenderer = _nodeRenders.TryGetValue(typeId, out var renderer) ? renderer : _defaultNodeRenderer;
@@ -73,6 +78,7 @@ internal class GraphRenderer
             RenderElement(nodeRenderer, rc, args, _state.NodeContextCache, node.Id, node, ref _state);
         }
 
+        // todo connections from query
         foreach (var conn in _state.Graph?.Connections ?? [])
         {
             RenderElement(_connectionRenderer, rc, args, _state.ConnectionContextCache, conn, conn, ref _state);

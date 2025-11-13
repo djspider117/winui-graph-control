@@ -81,7 +81,7 @@ public sealed partial class DataGraphView : UserControl
         RecreateResources(sender);
     }
 
-    private void RecreateResources(ICanvasResourceCreator resourceCreator)
+    private void RecreateResources(ICanvasAnimatedControl resourceCreator)
     {
         if (_renderer == null)
             _invaldated = true;

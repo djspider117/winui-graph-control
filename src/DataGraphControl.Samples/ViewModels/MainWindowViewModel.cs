@@ -26,5 +26,6 @@ public partial class MainWindowViewModel : ObservableObject
             new("Unity Style", "An Unity3D style node graph", Symbol.OutlineStar, typeof(UnityStyleSample)),
             new("Nuke Style", "An Nuke/NukeX style node graph", Symbol.Comment, typeof(NukeStyleSample))
         ];
+        SelectedSample = AvailableSamples[0];
     }
 }
