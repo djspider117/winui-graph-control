@@ -14,7 +14,7 @@ public abstract class ElementRenderContext : IDisposable
     public VisualState VisualState { get; set; }
     public Vector2 Position { get; set; }
     public Vector2 Size { get; set; }
-    public bool Dirty { get; set; }
+    public bool Dirty { get; set; } = true;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual void SetDisposableProperty<T>(T? value, ref T? backingField)

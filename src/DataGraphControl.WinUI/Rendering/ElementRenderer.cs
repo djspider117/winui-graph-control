@@ -11,7 +11,12 @@ public abstract class ElementRenderer<TContext> : IElementRenderer
         if (context is not TContext ctx)
             return;
 
-        LayoutInternal(rc, ref ctx, ref state, ref renderInfoContext);
+        if (ctx.Dirty)
+        {
+            LayoutInternal(rc, ref ctx, ref state, ref renderInfoContext);
+            ctx.Dirty = false;
+        }
+
         RenderInternal(rc, args, ref ctx, ref state, ref renderInfoContext);
 
         context = ctx;
